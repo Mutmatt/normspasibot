@@ -19,12 +19,8 @@ class MessageAnswer(telepot.helper.ChatHandler):
         filteredWords = list(map(lambda x: regex.sub('', x), msgText))
 
         #Ответ красное
-        answersForRed = ["вопрос", "вопросик", "совет", "советик", "помощь", "помогите", "помогайте", "поможете", "проблему", "проблема", "проблемка", "проблемку"]
-        answeredForRedAnyPlace = ["посоветоваться", "посоветуйте"]
-        if len(msgText) >= 2 and len(msgText) < 7 \
-                             and (any(filteredWords[-1] == word for word in answersForRed) \
-                                  or any(redWord == word for redWord in answeredForRedAnyPlace 
-                                                         for word in filteredWords)):
+        answersForRed = ["вопрос", "вопросик", "совет", "советик", "помощь", "помогите", "помогайте", "поможете", "проблему", "проблема", "проблемка", "проблемку", "посоветоваться", "посоветуйте"]
+        if len(msgText) >= 2 and len(msgText) < 7 and any(filteredWords[-1] == word for word in answersForRed):
             self.sender.sendMessage("красное")
             print(datetime.now(), ": RED on ", msgText, " from ", msg['from']['username'], "")
             return
