@@ -32,7 +32,7 @@ class MessageAnswer(telepot.helper.ChatHandler):
             return
 
         #Ответ на нормально
-        if any("нормально" == word for word in filteredWords):
+        if any("нормальн" == word for word in filteredWords):
             self.sender.sendMessage("спасибо")
             print(datetime.now(), ": SPASIB on ", msgText, " from ", msg['from']['username'], "")
             return
