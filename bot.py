@@ -44,7 +44,7 @@ class MessageAnswer(telepot.helper.ChatHandler):
             return
 
         #Ответ на не понимаю, кто понимает, не могу понять, не понять
-        if any("поним" or "понятн" in word for word in filteredWords) and any("не" == word for word in filteredWords):
+        if (any("поним" in word for word in filteredWords) or any("поня" in word for word in filteredWords)) and any("не" == word for word in filteredWords):
             self.sender.sendMessage("ты просто не можешь понять")
             print(datetime.now(), ": PONYAL on ", msgText, " from ", msg['from']['username'], "")
             return
