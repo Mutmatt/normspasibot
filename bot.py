@@ -1,4 +1,5 @@
 import sys
+import re
 import time
 import telepot
 from datetime import datetime
@@ -10,25 +11,55 @@ class MessageAnswer(telepot.helper.ChatHandler):
         super(MessageAnswer, self).__init__(*args, **kwargs)
 
     def on_chat_message(self, msg):
-    	msgText = msg['text'].lower()
+        regex = re.compile('[^a-zA-Zа-яА-Я]')
 
-    	#Ответ на текст с как
-    	if "как " in msgText or msgText.endswith(" как"):
-    		self.sender.sendMessage("нормально, спасибо")
-    		print(datetime.now(), ": NORM on ", msgText, " from ", msg['from']['username'], "")
+        initialMessage = msg['text']
+        msgText = initialMessage.lower().split(' ')
 
-    	#Ответ на вопрос с почему
-    	pochemus = ("почему ", " почему", "почему")
-    	if any(x in msgText for x in pochemus):
-    		self.sender.sendMessage("так вышло")
-    		print(datetime.now(), ": TAK VISHLO on ", msgText, " from ", msg['from']['username'])
+        filteredWords = list(map(lambda x: regex.sub('', x), msgText))
 
-    	#Ответ на вопрос с инфинитивом
-    	if "?" in msgText:
-    		firstWord = msgText.partition(' ')[0].replace("?", "")
-    		if (firstWord.endswith("ть") or firstWord.endswith("ться")):
-	    		self.sender.sendMessage("давай")
-	    		print(datetime.now(), ": DAVAI on ", msgText, " from ", msg['from']['username'])
+        #Ответ красное
+        answersForRed = ["вопрос", "вопросик", "совет", "советик", "помощь", "помогите", "помогайте", "поможете", "проблему", "проблема", "проблемка", "проблемку"]
+        answeredForRedAnyPlace = ["посоветоваться", "посоветуйте"]
+        if len(msgText) >= 2 and len(msgText) < 7 \
+                             and (any(filteredWords[-1] == word for word in answersForRed) \
+                                  or any(redWord == word for redWord in answeredForRedAnyPlace 
+                                                         for word in filteredWords)):
+            self.sender.sendMessage("красное")
+            print(datetime.now(), ": RED on ", msgText, " from ", msg['from']['username'], "")
+            return
+
+        #Ответ на как
+        if any("как" == word for word in filteredWords):
+            self.sender.sendMessage("нормально, спасибо")
+            print(datetime.now(), ": NORM on ", msgText, " from ", msg['from']['username'], "")
+            return
+
+        #Ответ на нормально
+        if any("нормально" == word for word in filteredWords):
+            self.sender.sendMessage("спасибо")
+            print(datetime.now(), ": SPASIB on ", msgText, " from ", msg['from']['username'], "")
+            return
+
+        #Ответ на пока
+        if any("пока" == word for word in filteredWords):
+            self.sender.sendMessage("ну пока")
+            print(datetime.now(), ": NU_POKA on ", msgText, " from ", msg['from']['username'], "")
+            return
+
+        #Ответ на не понимаю, кто понимает, не могу понять, не понять
+        if any("поним" or "понятн" in word for word in filteredWords) and any("не" == word for word in filteredWords):
+            self.sender.sendMessage("ты просто не можешь понять")
+            print(datetime.now(), ": PONYAL on ", msgText, " from ", msg['from']['username'], "")
+            return
+
+        #Ответ на вопрос с инфинитивом
+        if "?" in initialMessage:
+            firstWord = msgText[0]
+            if (firstWord.endswith("ть") or firstWord.endswith("ться") or firstWord.endswith("ти")):
+                self.sender.sendMessage("давай")
+                print(datetime.now(), ": DAVAI on ", msgText, " from ", msg['from']['username'])
+                return
 
 
 TOKEN = sys.argv[1]  # get token from command-line
